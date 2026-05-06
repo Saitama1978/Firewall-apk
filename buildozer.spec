@@ -71,7 +71,7 @@ android.bootstrap = sdl2
 # PYTHON-FOR-ANDROID FIX
 # ==============================
 
-# 🔥 IMPORTANT (fix sa gradlew failure)
+# IMPORTANT (fix sa gradlew failure)
 p4a.branch = stable
 
 
