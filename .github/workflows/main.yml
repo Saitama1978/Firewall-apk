@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK Ultimate
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04 # Pinaka-stable na OS para sa Buildozer ngayong 2026
 
     steps:
       - name: Checkout Code
@@ -16,22 +16,24 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.10' # Recommended version para sa Kivy at maritime tools mo
 
       - name: Install System Dependencies
         run: |
           sudo apt update
+          # Dito natin i-pre-install ang ANT at Java para iwas sa download errors
           sudo apt install -y git zip unzip openjdk-17-jdk ant python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libffi-dev libssl-dev cmake gettext libltdl-dev libgmp-dev libmpc-dev libmpfr-dev
+          # Ginagamit natin ang Cython < 3.0 para sa stability
           pip install --user --upgrade "cython<3.0" buildozer virtualenv
 
       - name: Build APK with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Ituro natin sa system kung nasaan ang Ant para hindi na ito mag-download
+          # Ituturo natin sa Buildozer kung nasaan na ang ANT para hindi na siya mag-download uli
           export ANT_HOME=/usr/share/ant
           export PATH=$PATH:$ANT_HOME/bin
           
-          # Force build at iwas sa FileNotFoundError
+          # Force build: yes | para sa lahat ng licenses, at inalis ang 'clean' para iwas FileNotFoundError
           yes | buildozer android debug || true
           buildozer android debug
         env:
@@ -42,5 +44,6 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RAMSaver-Firewall-Final
+          name: Mobile-App-Installer
           path: bin/*.apk
+          
