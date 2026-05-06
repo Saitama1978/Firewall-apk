@@ -2,48 +2,42 @@ name: Build APK Ultimate
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # Pinaka-stable na OS para sa Buildozer ngayong 2026
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          python-version: '3.10' # Recommended version para sa Kivy at maritime tools mo
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Install System Dependencies
         run: |
           sudo apt update
-          # Dito natin i-pre-install ang ANT at Java para iwas sa download errors
-          sudo apt install -y git zip unzip openjdk-17-jdk ant python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libffi-dev libssl-dev cmake gettext libltdl-dev libgmp-dev libmpc-dev libmpfr-dev
-          # Ginagamit natin ang Cython < 3.0 para sa stability
-          pip install --user --upgrade "cython<3.0" buildozer virtualenv
+          sudo apt install -y build-essential git python3-dev ffmpeg libsdl2-dev \
+          libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev \
+          libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev \
+          libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+          libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev \
+          liblzma-dev libffi-dev uuid-dev libreadline-dev libncurses5-dev \
+          libncursesw5-dev libdb5.3-dev libexpat1-dev pkg-config libicu-dev \
+          autoconf automake libtool cmake ant zip unzip
 
-      - name: Build APK with Buildozer
+      - name: Install Buildozer
         run: |
-          export PATH=$PATH:$HOME/.local/bin
-          # Ituturo natin sa Buildozer kung nasaan na ang ANT para hindi na siya mag-download uli
-          export ANT_HOME=/usr/share/ant
-          export PATH=$PATH:$ANT_HOME/bin
-          
-          # Force build: yes | para sa lahat ng licenses, at inalis ang 'clean' para iwas FileNotFoundError
-          yes | buildozer android debug || true
-          buildozer android debug
-        env:
-          APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+          pip install --upgrade pip
+          pip install "Cython<3.0" buildozer
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Mobile-App-Installer
-          path: bin/*.apk
-          
+      - name: Build APK
+        run: |
+          # Fresh start para iwas 'Broken pipe'
+          rm -rf .buildozer
+          buildozer -v android debug
