@@ -27,7 +27,7 @@ jobs:
           libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
           libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev \
           liblzma-dev libffi-dev uuid-dev libreadline-dev libncurses5-dev \
-          libncursesw5-dev libdb5.3-dev libexpat1-dev pkg-config libicu-dev \
+          libncursesw5-dev libexpat1-dev pkg-config libicu-dev \
           autoconf automake libtool cmake ant zip unzip
 
       - name: Install Buildozer
@@ -38,6 +38,5 @@ jobs:
 
       - name: Build APK
         run: |
-          # Fresh start para iwas 'Broken pipe'
           rm -rf .buildozer
           buildozer -v android debug
