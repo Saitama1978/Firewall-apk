@@ -27,12 +27,20 @@ jobs:
       - name: Build APK with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
+          # Ituro natin sa system kung nasaan ang Ant para hindi na ito mag-download
           export ANT_HOME=/usr/share/ant
           export PATH=$PATH:$ANT_HOME/bin
           
-          # Force build kahit may network glitches
+          # Force build at iwas sa FileNotFoundError
           yes | buildozer android debug || true
           buildozer android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
           GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RAMSaver-Firewall-Final
+          path: bin/*.apk
